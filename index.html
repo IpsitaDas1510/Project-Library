@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>LIBRARY</h1>
+    <button id="newBookBtn">New Book</button>
+
+  <!-- Modal Form -->
+  <dialog id="bookDialog">
+    <form id="bookForm">
+      <label>
+        Title:
+        <input type="text" id="titleInput" required>
+      </label>
+
+      <label>
+        Author:
+        <input type="text" id="authorInput" required>
+      </label>
+
+      <label>
+        Pages:
+        <input type="number" id="pagesInput" required>
+      </label>
+
+      <label>
+        Read?
+        <input type="checkbox" id="readInput">
+      </label>
+
+      <button type="submit">Add Book</button>
+      <button type="button" id="cancelBtn">Cancel</button>
+    </form>
+  </dialog>
+
+  <!-- Where books will be displayed -->
+  <div id="libraryContainer"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+    <script src ="script.js"></script>
+</body>
+</html>
