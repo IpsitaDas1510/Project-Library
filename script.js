@@ -1,90 +1,113 @@
 const myLibrary = [];
 
-function Book(author,title, price,pages) {
-  this.id = crypto.randomUUID();
-  this.author= author;
-  this.title= title;
-  this.price = price;
-  this.pages = pages;
+function Book(title, author, pages, read) {
+    this.id = crypto.randomUUID();
+    this.title = title;
+    this.author = author;
+    this.pages = pages;
+    this.read = read;
 }
 
-function addBookToLibrary() {
-  const newBook = new Book (author,title,price,pages);
-  myLibrary.push(newBook);
-  displayLibrary()
+Book.prototype.toggleRead = function () {
+    this.read = !this.read;
 }
-function displayLibrary() {
-  const container = document.getElementById("libraryContainer");
-  container.innerHTML = ""; // Clear previous DOM elements
 
-  library.forEach(book => {
-    const card = document.createElement("div");
-    card.classList.add("book-card");
-    card.dataset.id = book.id;
+const addBookToLibrary = (title, author, pages, read) => {
+    const newBook = new Book(title, author, pages, read);
+    myLibrary.push(newBook);
+    renderLibrary();
+}
 
-    card.innerHTML = `
-      <h3>${book.title}</h3>
-      <p><strong>Author:</strong> ${book.author}</p>
-      <p><strong>Pages:</strong> ${book.pages}</p>
-      <p><strong>Read:</strong> ${book.isRead ? "Yes" : "No"}</p>
-      <button class="toggle-btn">Toggle Read</button>
-      <button class="remove-btn">Remove</button>
-    `;
+const renderLibrary = () => {
+    const container = document.querySelector("#library");
+    container.innerHTML = "";
 
-    // Toggle Read Button Handler
-    card.querySelector(".toggle-btn").addEventListener("click", () => {
-      const bookObj = library.find(b => b.id === book.id);
-      bookObj.toggleRead();
-      displayLibrary();
+    myLibrary.map(book => {
+        const card = document.createElement("div");
+        card.classList.add("card");
+        card.dataset.id = book.id;
+        card.innerHTML = `
+        <div class="book-title-container">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><title>book</title><path d="M18,22A2,2 0 0,0 20,20V4C20,2.89 19.1,2 18,2H12V9L9.5,7.5L7,9V2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18Z" /></svg>
+        <h3 class="book-title">${book.title}</h3>
+        </div>
+        <p class="book-author">by ${book.author}</p>
+        <p class="book-pages">${book.pages} pages</p>
+        <p class="read-status ${book.read ? "read" : "unread"}">${book.read ? "Read" : "Unread"}</p>
+        <div class="card-btns">
+        <button class="toggleRead ${book.read ? "read" : "unread"}">${book.read ? "Mark as Unread" : "Mark as Read"}</button>
+        <button class="remove">Remove</button>
+        </div>`;
+        container.appendChild(card);
     });
 
-    // Remove Book Button Handler
-    card.querySelector(".remove-btn").addEventListener("click", () => {
-      const index = library.findIndex(b => b.id === book.id);
-      library.splice(index, 1);
-      displayLibrary();
-    });
-
-    container.appendChild(card);
-  });
+    addCardEvents();
 }
 
-// --------------------
-// UI Elements
-// --------------------
-const newBookBtn = document.getElementById("newBookBtn");
-const dialog = document.getElementById("bookDialog");
-const cancelBtn = document.getElementById("cancelBtn");
-const bookForm = document.getElementById("bookForm");
+const toggleBookStatus = (id) => {
+    const book = myLibrary.find(book => book.id === id);
+    if(book) {
+        book.toggleRead();
+        renderLibrary();
+    }
+}
 
-const titleInput = document.getElementById("titleInput");
-const authorInput = document.getElementById("authorInput");
-const pagesInput = document.getElementById("pagesInput");
-const readInput = document.getElementById("readInput");
+const removeBook = (id) => {
+    const index = myLibrary.findIndex(book => book.id === id);
+    if(index !== -1) {
+        myLibrary.splice(index, 1);
+        renderLibrary();
+    }
+}
 
-// --------------------
-// Form + Dialog Logic
-// --------------------
-newBookBtn.addEventListener("click", () => dialog.showModal());
-cancelBtn.addEventListener("click", () => dialog.close());
+const addCardEvents = () => {
+    const removeBtns = document.querySelectorAll(".remove");
+    const toggleReadBtns = document.querySelectorAll(".toggleRead");
 
-bookForm.addEventListener("submit", (e) => {
-  e.preventDefault(); // prevents page reload / server submission
+    toggleReadBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.parentElement.parentElement.dataset.id;
+            toggleBookStatus(id);
+        })
+    })
+    
+    removeBtns.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const id = btn.parentElement.parentElement.dataset.id;
+            removeBook(id);
+        })
+    })
+}
 
-  addBookToLibrary(
-    titleInput.value,
-    authorInput.value,
-    pagesInput.value,
-    readInput.checked
-  );
+const events = {
+    newBookBtn: document.querySelector("#new-book"),
+    dialog: document.querySelector("dialog"),
+    form: document.querySelector("form"),
+    closeDialogBtn: document.querySelector("#close"),
+}
 
-  bookForm.reset();
-  dialog.close();
+events.newBookBtn.addEventListener("click", () => {
+    events.dialog.showModal();
 });
 
-// --------------------
-// Example Books
-// --------------------
-addBookToLibrary("The Hobbit", "J.R.R. Tolkien", 310, true);
-addBookToLibrary("Dune", "Frank Herbert", 412, false);
+events.closeDialogBtn.addEventListener("click", () => {
+    events.dialog.close();
+    events.form.reset();
+});
 
+events.form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const title = events.form.elements.title.value;
+    const author = events.form.elements.author.value;
+    const pages = events.form.elements.pages.value;
+    let read = events.form.elements.read.checked ? true : false;
+
+    addBookToLibrary(title, author, pages, read);
+    events.dialog.close();
+    events.form.reset();
+});
+
+addBookToLibrary("1984", "George Orwell", 328, false);
+addBookToLibrary("Pride and Prejudice", "Jane Austen", 398, false);
+addBookToLibrary("Fahrenheit 451", "Ray Bradbury", 208, false);
+addBookToLibrary("The Alchemist", "Paulo Coelho", 197, false);
